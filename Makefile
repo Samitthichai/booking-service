@@ -12,7 +12,10 @@ MIGRATE = docker run --rm \
 	migrate/migrate -path /migrations \
 	-database "postgres://$(DB_USER):$(DB_PASSWORD)@db-postgres:5432/$(DB_NAME)?sslmode=$(DB_SSLMODE)"
 
-.PHONY: db-up db-down db-logs psql migrate-up migrate-down migrate-force migrate-create
+.PHONY: run db-up db-down db-logs psql migrate-up migrate-down migrate-force migrate-create
+
+run:
+	go run ./cmd/api
 
 # --- Docker (Postgres) ---
 db-up:
@@ -22,7 +25,7 @@ db-down:
 	docker compose down
 
 db-logs:
-	docker compose logs -f db
+	docker compose logs -f db-postgres
 
 psql:
 	docker compose exec db-postgres psql -U $(DB_USER) -d $(DB_NAME)
