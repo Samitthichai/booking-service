@@ -15,7 +15,7 @@ func NewUserHandler(userService service.UserService) *UserHandler {
 }
 
 func (h *UserHandler) RegisterUser(c *gin.Context) {
-	var req RegisterRequest
+	var req AuthenticationRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{"message": "Invalid request", "status": 400})
@@ -34,4 +34,26 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 		"status":  201,
 	})
 
+}
+
+func (h *UserHandler) LoginUser(c *gin.Context) {
+	var req AuthenticationRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"message": "Invalid request", "status": 400})
+		return
+	}
+
+	token, err := h.userService.LoginUser(req.Email, req.Password)
+	if err != nil {
+		c.JSON(401, gin.H{"message": "Invalid credentials", "status": 401})
+		return
+	}
+
+	c.SetCookie("token", token, 3600*24, "/", "", true, true)
+
+	c.JSON(200, gin.H{
+		"message": "Login Success",
+		"status":  200,
+	})
 }
