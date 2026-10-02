@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"booking-service/internal/handler"
+	"booking-service/internal/middleware"
 	"booking-service/internal/model"
 	"booking-service/internal/repository"
 	"booking-service/internal/service"
@@ -45,7 +46,6 @@ func main() {
 	}
 	log.Println("schema up to date")
 
-	// DI chain: repository -> service -> handler
 	userRepo := repository.NewGormUserRepository(db)
 	userSvc := service.NewUserService(userRepo)
 	userHandler := handler.NewUserHandler(userSvc)
@@ -86,7 +86,16 @@ func setupRouter(h Handlers) *gin.Engine {
 	})
 
 	api := r.Group("/api")
-	api.POST("/auth/register", h.User.RegisterUser)
-	api.POST("/auth/login", h.User.LoginUser)
+
+	auth := api.Group("/auth")
+	auth.POST("/register", h.User.RegisterUser)
+	auth.POST("/login", h.User.LoginUser)
+
+	api.Use(middleware.RequireAuth())
+
+	//TODO: add more routes here currently only test for checking if auth middleware works
+	api.GET("/test", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "success"})
+	})
 	return r
 }
