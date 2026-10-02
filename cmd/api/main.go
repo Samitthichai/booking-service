@@ -5,13 +5,20 @@ import (
 	"log"
 	"os"
 
+	"booking-service/internal/handler"
 	"booking-service/internal/model"
+	"booking-service/internal/repository"
+	"booking-service/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
+
+type Handlers struct {
+	User *handler.UserHandler
+}
 
 func main() {
 
@@ -38,7 +45,15 @@ func main() {
 	}
 	log.Println("schema up to date")
 
-	r := setupRouter()
+	// DI chain: repository -> service -> handler
+	userRepo := repository.NewGormUserRepository(db)
+	userSvc := service.NewUserService(userRepo)
+	userHandler := handler.NewUserHandler(userSvc)
+
+	h := Handlers{
+		User: userHandler,
+	}
+	r := setupRouter(h)
 
 	port := os.Getenv("APP_PORT")
 	log.Printf("listening on :%s", port)
@@ -63,12 +78,14 @@ func connectDB() (*gorm.DB, error) {
 	return gorm.Open(postgres.Open(dsn), &gorm.Config{})
 }
 
-func setupRouter() *gin.Engine {
+func setupRouter(h Handlers) *gin.Engine {
 	r := gin.Default()
 	r.SetTrustedProxies([]string{"172.20.0.0/16"})
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
 
+	api := r.Group("/api")
+	api.POST("/auth/register", h.User.RegisterUser)
 	return r
 }
