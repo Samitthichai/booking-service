@@ -11,6 +11,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var ErrEmailExists = errors.New("email already exists")
+
 type UserService interface {
 	CreateUser(email, password string) error
 	LoginUser(email, password string) (string, error)
@@ -27,8 +29,7 @@ func NewUserService(userRepo repository.UserRepository) UserService {
 func (s *userService) CreateUser(email, password string) error {
 
 	if _, err := s.userRepo.GetUserByEmail(email); err == nil {
-		return errors.New("email already exists")
-
+		return ErrEmailExists
 	}
 
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
