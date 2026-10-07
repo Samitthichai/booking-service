@@ -1,0 +1,12 @@
+.git
+.github
+.env
+.env.*
+!.env.example
+api
+*.out
+*.test
+coverage.*
+.vscode
+.idea
+.DS_Store

@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"errors"
+
 	"booking-service/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -25,7 +27,11 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 	password := req.Password
 
 	if err := h.userService.CreateUser(email, password); err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		if errors.Is(err, service.ErrEmailExists) {
+			c.JSON(409, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(500, gin.H{"error": "internal server error"})
 		return
 	}
 

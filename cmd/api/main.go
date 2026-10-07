@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"booking-service/internal/handler"
 	"booking-service/internal/middleware"
@@ -11,6 +12,7 @@ import (
 	"booking-service/internal/repository"
 	"booking-service/internal/service"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -81,6 +83,18 @@ func connectDB() (*gorm.DB, error) {
 func setupRouter(h Handlers) *gin.Engine {
 	r := gin.Default()
 	r.SetTrustedProxies([]string{"172.20.0.0/16"})
+
+	origins := os.Getenv("CORS_ALLOWED_ORIGINS")
+	if origins == "" {
+		origins = "http://localhost:3000"
+	}
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     strings.Split(origins, ","),
+		AllowMethods:     []string{"GET", "POST", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type"},
+		AllowCredentials: true, // required for JWT httpOnly cookie
+	}))
+
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
