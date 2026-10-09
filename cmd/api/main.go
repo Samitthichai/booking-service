@@ -111,10 +111,12 @@ func setupRouter(h Handlers) *gin.Engine {
 
 	auth.POST("/register", h.User.RegisterUser)
 	auth.POST("/login", h.User.LoginUser)
+	api.GET("/services", h.Services.GetAllServices)
 
 	api.Use(middleware.RequireAuth())
 	adminApi := api.Group("/admin")
 	adminApi.Use(middleware.RequireAdmin())
 	adminApi.POST("/services", h.Services.CreateServices)
+
 	return r
 }

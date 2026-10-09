@@ -18,3 +18,12 @@ func (r *GormServicesRepository) CreateService(services *model.Services) error {
 	return r.db.Create(services).Error
 
 }
+
+func (r *GormServicesRepository) GetAllServices() ([]model.Services, error) {
+	var services []model.Services
+
+	if err := r.db.Find(&services).Error; err != nil {
+		return nil, err
+	}
+	return services, nil
+}
