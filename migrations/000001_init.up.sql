@@ -8,13 +8,13 @@ CREATE TABLE users (
     created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- CREATE TABLE services (
---     id               BIGSERIAL PRIMARY KEY,
---     name             TEXT NOT NULL,
---     duration_minutes INT NOT NULL CHECK (duration_minutes > 0),
---     price            NUMERIC(10, 2) NOT NULL DEFAULT 0 CHECK (price >= 0),
---     created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
--- );
+CREATE TABLE services (
+    id               BIGSERIAL PRIMARY KEY,
+    name             TEXT NOT NULL,
+    duration_minutes INT NOT NULL CHECK (duration_minutes > 0),
+    price            NUMERIC(10, 2) NOT NULL DEFAULT 0 CHECK (price >= 0),
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 
 -- CREATE TABLE bookings (
 --     id         BIGSERIAL PRIMARY KEY,

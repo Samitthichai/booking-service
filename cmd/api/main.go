@@ -20,7 +20,8 @@ import (
 )
 
 type Handlers struct {
-	User *handler.UserHandler
+	User     *handler.UserHandler
+	Services *handler.ServiceHandler
 }
 
 func main() {
@@ -43,7 +44,7 @@ func main() {
 	}
 	log.Println("database connected")
 
-	if err := db.AutoMigrate(&model.User{}); err != nil {
+	if err := db.AutoMigrate(&model.User{}, &model.Services{}); err != nil {
 		log.Fatalf("failed to auto-migrate: %v", err)
 	}
 	log.Println("schema up to date")
@@ -52,8 +53,13 @@ func main() {
 	userSvc := service.NewUserService(userRepo)
 	userHandler := handler.NewUserHandler(userSvc)
 
+	servicesRepo := repository.NewGormServicesRepository(db)
+	servicesSvc := service.NewServsService(servicesRepo)
+	servicesHandler := handler.NewServsHandler(servicesSvc)
+
 	h := Handlers{
-		User: userHandler,
+		User:     userHandler,
+		Services: servicesHandler,
 	}
 	r := setupRouter(h)
 
@@ -92,7 +98,7 @@ func setupRouter(h Handlers) *gin.Engine {
 		AllowOrigins:     strings.Split(origins, ","),
 		AllowMethods:     []string{"GET", "POST", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type"},
-		AllowCredentials: true, // required for JWT httpOnly cookie
+		AllowCredentials: true,
 	}))
 
 	r.GET("/health", func(c *gin.Context) {
@@ -102,14 +108,13 @@ func setupRouter(h Handlers) *gin.Engine {
 	api := r.Group("/api")
 
 	auth := api.Group("/auth")
+
 	auth.POST("/register", h.User.RegisterUser)
 	auth.POST("/login", h.User.LoginUser)
 
 	api.Use(middleware.RequireAuth())
-
-	//TODO: add more routes here currently only test for checking if auth middleware works
-	api.GET("/test", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "success"})
-	})
+	adminApi := api.Group("/admin")
+	adminApi.Use(middleware.RequireAdmin())
+	adminApi.POST("/services", h.Services.CreateServices)
 	return r
 }
