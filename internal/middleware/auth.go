@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"booking-service/internal/model"
 	"fmt"
 	"os"
 
@@ -38,6 +39,17 @@ func RequireAuth() gin.HandlerFunc {
 
 		c.Set("userID", int64(sub))
 		c.Set("role", claims["role"])
+		c.Next()
+	}
+}
+
+func RequireAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role, _ := c.Get("role")
+		if role != model.RoleAdmin {
+			c.AbortWithStatusJSON(403, gin.H{"error": "forbidden"})
+			return
+		}
 		c.Next()
 	}
 }

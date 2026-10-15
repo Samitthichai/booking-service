@@ -60,6 +60,5 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"message": "Login Success",
-		"status":  200,
 	})
 }
