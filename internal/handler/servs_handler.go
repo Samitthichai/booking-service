@@ -19,7 +19,7 @@ func (h *ServiceHandler) CreateServices(c *gin.Context) {
 	var request ServicesRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(400, gin.H{"message": "Invalid request", "status": 400})
+		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
