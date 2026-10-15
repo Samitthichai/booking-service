@@ -19,11 +19,31 @@ func (r *GormServicesRepository) CreateService(services *model.Services) error {
 
 }
 
-func (r *GormServicesRepository) GetAllServices() ([]model.Services, error) {
+func (r *GormServicesRepository) GetAllServices(includeInactive bool) ([]model.Services, error) {
 	var services []model.Services
 
-	if err := r.db.Find(&services).Error; err != nil {
+	q := r.db.Model(&model.Services{})
+	if !includeInactive {
+		q = q.Where("is_active = ?", true)
+	}
+	if err := q.Find(&services).Error; err != nil {
 		return nil, err
 	}
 	return services, nil
+}
+
+func (r *GormServicesRepository) GetServiceByID(id int64) (*model.Services, error) {
+	var s model.Services
+	if err := r.db.First(&s, id).Error; err != nil {
+		return nil, err
+	}
+	return &s, nil
+}
+
+func (r *GormServicesRepository) UpdateService(services *model.Services) error {
+	return r.db.Save(services).Error
+}
+
+func (r *GormServicesRepository) DeleteService(id int64) error {
+	return r.db.Delete(&model.Services{}, id).Error
 }
