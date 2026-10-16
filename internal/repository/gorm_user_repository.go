@@ -20,7 +20,7 @@ func (r *GormUserRepository) CreateUser(user *model.User) error {
 
 func (r *GormUserRepository) GetUserByEmail(email string) (*model.User, error) {
 	var user model.User
-	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {
+	if err := r.db.Where("LOWER(email) = LOWER(?)", email).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

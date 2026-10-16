@@ -52,7 +52,7 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 
 	token, err := h.userService.LoginUser(req.Email, req.Password)
 	if err != nil {
-		c.JSON(401, gin.H{"message": "Invalid credentials", "status": 401})
+		c.JSON(401, gin.H{"error": service.ErrInvalidCredentials.Error()})
 		return
 	}
 
@@ -61,4 +61,27 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "Login Success",
 	})
+}
+
+func (h *UserHandler) RegisterAdmin(c *gin.Context) {
+	var req AdminRegisterRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": "invalid request"})
+		return
+	}
+
+	if err := h.userService.CreateAdmin(req.Email, req.Password, req.InviteCode); err != nil {
+		switch {
+		case errors.Is(err, service.ErrInvalidInviteCode):
+			c.JSON(403, gin.H{"error": err.Error()})
+		case errors.Is(err, service.ErrEmailExists):
+			c.JSON(409, gin.H{"error": err.Error()})
+		default:
+			c.JSON(500, gin.H{"error": "internal server error"})
+		}
+		return
+	}
+
+	c.JSON(201, gin.H{"message": "Create Success"})
 }

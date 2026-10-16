@@ -96,7 +96,7 @@ func setupRouter(h Handlers) *gin.Engine {
 	}
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     strings.Split(origins, ","),
-		AllowMethods:     []string{"GET", "POST", "DELETE", "OPTIONS"},
+		AllowMethods:     []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type"},
 		AllowCredentials: true,
 	}))
@@ -112,11 +112,15 @@ func setupRouter(h Handlers) *gin.Engine {
 	auth.POST("/register", h.User.RegisterUser)
 	auth.POST("/login", h.User.LoginUser)
 	api.GET("/services", h.Services.GetAllServices)
+	api.POST("/admin/register", h.User.RegisterAdmin)
 
 	api.Use(middleware.RequireAuth())
 	adminApi := api.Group("/admin")
 	adminApi.Use(middleware.RequireAdmin())
 	adminApi.POST("/services", h.Services.CreateServices)
+	adminApi.GET("/services", h.Services.GetAllServicesAdmin)
+	adminApi.PATCH("/services/:id", h.Services.PatchService)
+	adminApi.DELETE("/services/:id", h.Services.DeleteService)
 
 	return r
 }
