@@ -25,3 +25,6 @@ coverage.*
 
 # Go
 vendor/
+
+# pgAdmin pgpass (contains DB password)
+pgadmin/pgpass
