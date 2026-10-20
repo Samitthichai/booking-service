@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "QueueUp DB",
+      "Group": "Servers",
+      "Host": "db-postgres",
+      "Port": 5432,
+      "MaintenanceDB": "queueup",
+      "Username": "queueup",
+      "SSLMode": "disable",
+      "PassFile": "/pgpass"
+    }
+  }
+}
